@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        app:key="userName"
+        app:title="Pseudo"
+        app:summary="Dernier pseudo entré lors de l'utilisation de todo list"
+        android:icon="@drawable/ic_person_outline_black_24dp"/>
+
+</PreferenceScreen>
