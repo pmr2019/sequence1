@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Application ToDo</string>
+    <string name="edtPseudo">Pseudo</string>
+    <string name="NewListNameField">Nouvelle Liste</string>
+    <string name="OkString">Ok</string>
+    <string name="NewToDoItemName">Nouvelle Tâche</string>
+    <string name="preferences">Préférences</string>
+    <string name="BySubtitle">Par Eve et Iona</string>
+    <string name="promptforpseudo">Entrez votre pseudo</string>
+    <string name="promptListName">Entrez un nom pour la nouvelle liste</string>
+    <string name="listString">Liste</string>
+    <string name="promptTaskName">Entrez un nom pour la nouvelle tâche</string>
+    <string name="profilString">Profile</string>
+    <string name="pseudoDescription">Pseudo du dernier utilisateur</string>
+    <string name="pseudo">Pseudo</string>
+    <string name="textviewMain">pseudo</string>
+
+</resources>

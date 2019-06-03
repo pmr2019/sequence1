@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">ToDoApp</string>
+    <string name="pseudo">Login</string>
+    <string name="textviewMain">login</string>
+    <string name="edtPseudo">Login</string>
+    <string name="NewListNameField">New List</string>
+    <string name="OkString">OK</string>
+    <string name="NewToDoItemName">New Task</string>
+    <string name="preferences">Preferences</string>
+    <string name="BySubtitle">By Eve &amp; Iona</string>
+    <string name="promptforpseudo">Enter your login</string>
+    <string name="promptListName">Enter a name for the new list</string>
+    <string name="listString">List</string>
+    <string name="promptTaskName">Enter a name for the new task</string>
+    <string name="profilString">Profil</string>
+    <string name="pseudoDescription">Login of the last user</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
