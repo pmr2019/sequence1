@@ -1,1 +1,4 @@
-# sequence1
+#Application TODO LIST
+
+LUCA JAKOMUSLKI
+TRISTAN BUSCEMI
