@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:title="Login Date"
+        android:key="dateLogin"
+        android:defaultValue=""
+        android:summary="Dernière dte de login" />
+    <EditTextPreference
+        android:title="Prefs"
+        android:key="prefs"
+        android:defaultValue=""
+        android:summary="Tableaux des profils" />
+
+</PreferenceScreen>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Todo App</string>
+    <string name="nom">Nom :</string>
+    <string name="name">Name</string>
+    <string name="newList">Nouvelle liste</string>
+    <string name="newItem">Nouveau item</string>
+</resources>
