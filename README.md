@@ -1,4 +1,5 @@
-#Application TODO LIST
+# Application TODO LIST
 
 LUCA JAKOMUSLKI
+
 TRISTAN BUSCEMI
