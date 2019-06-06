@@ -9,10 +9,12 @@ import java.util.ArrayList;
 public class ProfileListeToDo implements Serializable {
 
     private String login;
+    private String mdp;
     protected ArrayList<ListeToDo> mMesListeToDo;
 
-    public ProfileListeToDo(String login, ArrayList<ListeToDo> mesListeToDo) {
+    public ProfileListeToDo(String login, String mdp, ArrayList<ListeToDo> mesListeToDo) {
         this.login = login;
+        this.mdp = mdp;
         mMesListeToDo = mesListeToDo;
     }
 
@@ -21,6 +23,14 @@ public class ProfileListeToDo implements Serializable {
     }
 
     public ProfileListeToDo() {
+    }
+
+    public String getMdp() {
+        return mdp;
+    }
+
+    public void setMdp(String mdp) {
+        this.mdp = mdp;
     }
 
     public String getLogin() {

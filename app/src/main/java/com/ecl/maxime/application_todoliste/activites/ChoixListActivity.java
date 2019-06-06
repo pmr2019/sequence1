@@ -27,6 +27,7 @@ public class ChoixListActivity extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private ProfileListeToDo mProfileListeToDo;
+    public static final String ID_LISTE = "id_liste";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +38,7 @@ public class ChoixListActivity extends AppCompatActivity {
 
         // Récupération du pseudo
         Intent intent = getIntent();
-        final String pseudoCourant = intent.getStringExtra("Pseudo");
+        final String pseudoCourant = intent.getStringExtra(MainActivity.PROFIL_COURANT);
 
         // Récupération du profil correspondant
         final SharedPreferences sharedPreferences = getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE);
@@ -58,8 +59,8 @@ public class ChoixListActivity extends AppCompatActivity {
                 // On sérialise la liste sélectionnée pour la transmettre à l'activité suivante
                 Gson gson1 = new Gson();
                 Intent i = new Intent(ChoixListActivity.this, ShowListActivity.class);
-                i.putExtra("Num", position);
-                i.putExtra("ProfileCourant", gson1.toJson(mProfileListeToDo));
+                i.putExtra(ID_LISTE, position);
+                i.putExtra(MainActivity.PROFIL_COURANT, gson1.toJson(mProfileListeToDo));
                 startActivity(i);
             }
         });

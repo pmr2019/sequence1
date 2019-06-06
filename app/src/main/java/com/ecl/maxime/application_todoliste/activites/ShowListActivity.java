@@ -41,8 +41,8 @@ public class ShowListActivity extends AppCompatActivity {
 
         final SharedPreferences sharedPreferences = getSharedPreferences(MainActivity.PREFS, MODE_PRIVATE);
         final Gson gson = new Gson();
-        final int num_liste = i.getIntExtra("Num", 0);
-        String profile = i.getStringExtra("ProfileCourant");
+        final int num_liste = i.getIntExtra(ChoixListActivity.ID_LISTE, 0);
+        String profile = i.getStringExtra(MainActivity.PROFIL_COURANT);
 
         mProfileListeToDo = null;
         if (profile!=null){
