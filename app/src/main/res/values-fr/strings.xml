@@ -14,5 +14,17 @@
     <string name="pseudoDescription">Pseudo du dernier utilisateur</string>
     <string name="pseudo">Pseudo</string>
     <string name="textviewMain">pseudo</string>
+    <string name="logOut">Déconnexion</string>
+    <string name="Url">url</string>
+    <string name="ErrorServerResponse">Problème avec la réponse serveur</string>
+    <string name="baseUrl">Url de base</string>
+    <string name="baseUrlDescription">Url de l\'API</string>
+    <string name="hashDescription">valeur du hash</string>
+    <string name="link">Lien</string>
+    <string name="msgAuthentication">Erreur d\'authentification</string>
+    <string name="noInternet">Pas d\'internet</string>
+    <string name="pass">mot de passe</string>
+    <string name="promptforpass">Entrez votre mot de passe</string>
+    <string name="wrongLogin">Pseudo ou mot de passe incorrect</string>
 
 </resources>

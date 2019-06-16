@@ -9,16 +9,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.sujet_sequence_1.models.ListeToDo;
+
 import java.util.ArrayList;
 
 class RecyclerViewAdapterList extends RecyclerView.Adapter<RecyclerViewAdapterList.ListViewHolder> {
-    public final String CAT = "PMR";
+    private final String CAT = "PMR";
     private ArrayList<ListeToDo> mesListesToDo;
     private OnItemClickListener onItemClickListener;
 
+    //Adaptateur du RecyclerView
     public RecyclerViewAdapterList(ArrayList<ListeToDo> mesListeToDo, OnItemClickListener onItemClickListener) {
         mesListesToDo = mesListeToDo;
         this.onItemClickListener = onItemClickListener;
+    }
+
+    // Mise à jour des données
+    public void setMesListesToDo(ArrayList<ListeToDo> desListeToDo) {
+        this.mesListesToDo = desListeToDo;
+        notifyDataSetChanged();
     }
 
     // Create new views (invoked by the layout manager)
@@ -49,11 +58,18 @@ class RecyclerViewAdapterList extends RecyclerView.Adapter<RecyclerViewAdapterLi
         void onItemClick(int indice);
     }
 
+
+    /**
+     * View Holder pour les ToDoListes
+     */
     public static class ListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView textViewListName;
+        TextView textViewListName;
         OnItemClickListener onItemClickListener;
 
-        public ListViewHolder(ConstraintLayout constraintLayout, OnItemClickListener onItemClickListener) {
+        /**
+         * Constructeur de ListViewHolder
+         */
+        ListViewHolder(ConstraintLayout constraintLayout, OnItemClickListener onItemClickListener) {
             super(constraintLayout);
             textViewListName = constraintLayout.findViewById(R.id.textViewListToDoItemName);
             this.onItemClickListener = onItemClickListener;
@@ -62,9 +78,9 @@ class RecyclerViewAdapterList extends RecyclerView.Adapter<RecyclerViewAdapterLi
 
         @Override
         public void onClick(View v) {
-            Log.i("PMR", String.valueOf(getAdapterPosition()));
+            Log.i("PMR", "Adapter position clicked : " + String.valueOf(getAdapterPosition()));
             onItemClickListener.onItemClick(getAdapterPosition());
-            Log.i("PMR", "OnClick");
         }
     }
+
 }

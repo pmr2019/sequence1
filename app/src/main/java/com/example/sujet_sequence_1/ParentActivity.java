@@ -1,8 +1,9 @@
 package com.example.sujet_sequence_1;
 
-import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,16 +11,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import com.example.sujet_sequence_1.settings.SettingsActivity;
 
 /**
  * Template d'activity héritant de AppCompatActivity
  * Celui-ci contient des méthodes utilitaire et l'initialisation de certaines variables (CAT, actionbar)
- *
  */
 public class ParentActivity extends AppCompatActivity {
     public final String CAT = "PMR";
@@ -27,17 +23,20 @@ public class ParentActivity extends AppCompatActivity {
 
     /**
      * On récupère l'actionBar lors de la création de l'activité
-     * @param savedInstanceState
+     *
+     * @param savedInstanceState : bundle utilisé en cas de redémarrage après un arrêt pour revenir à un état précédent.
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         actionBar = getSupportActionBar();
+        PreferenceManager.setDefaultValues(this, R.xml.settings, false);
     }
 
     /**
      * Méthode utilitaire générant un toast et un log
-     * @param s
+     *
+     * @param s : message d'alerte
      */
     protected void alerter(String s) {
         Log.i(CAT, s);
@@ -47,8 +46,8 @@ public class ParentActivity extends AppCompatActivity {
 
     /**
      * Création du menu dans l'action Bar
-     * @param menu
-     * @return
+     *
+     * @param menu : menu de l'action bar
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -59,8 +58,8 @@ public class ParentActivity extends AppCompatActivity {
     /**
      * Impémentation du comportement lors de la sélection d'une option dans le
      * menu de l'action bar
+     *
      * @param item l'item du menu sélectionné
-     * @return
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -71,84 +70,41 @@ public class ParentActivity extends AppCompatActivity {
                 toSettingsActivity = new Intent(this, SettingsActivity.class);
                 startActivity(toSettingsActivity);
                 break;
+            case R.id.action_disconnect:
+                disconnect();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     /**
-     * Importation du profil depuis les fichiers texte json correspondant
-     * ou création si pas de fichier existant
-     * @param pseudo chaîne de caractères du pseudo qu'on souhaite importé
-     * @return
+     * Récupération d'une préférence.
+     *
+     * @param pref: clé de la préférence
+     * @return : la valeur de la préférence
+     * @throws GetPreferenceException : si la préférence est vide.
      */
-    public ProfilListeToDo importProfil(String pseudo) {
-        final GsonBuilder builder = new GsonBuilder();
-        final Gson gson = builder.create();
-        String filename = pseudo + "_json";
-        FileInputStream inputStream;
-        StringBuilder sJsonLu = new StringBuilder();
-        ProfilListeToDo profil;
-
-        /* Import du fichier JSON de sauvegarde dans l'objet */
-        try {
-            inputStream = openFileInput(filename);
-            int content;
-            while ((content = inputStream.read()) != -1) {
-                // convert to char and display it
-                sJsonLu.append((char) content);
-            }
-            inputStream.close();
-
-            profil = gson.fromJson(sJsonLu.toString(), ProfilListeToDo.class);
-        } catch (Exception e) {
-
-            /* Creation d'un profil */
-            profil = newProfil(pseudo);
-            Log.i(CAT, "Création d'un nouveau profil " + profil.getLogin());
-
-            String fileContents = gson.toJson(profil);
-            FileOutputStream outputStream;
-
-            try {
-                outputStream = openFileOutput(filename, MODE_PRIVATE);
-                outputStream.write(fileContents.getBytes());
-                outputStream.close();
-                Log.i(CAT, "Création du fichier  " + pseudo + "_json");
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                Log.i(CAT, "Impossible de créer le fichier de sauvegarde du profil par défaut");
-            }
+    public String recupPreference(String pref) throws GetPreferenceException {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        String storedString = settings.getString(pref, "");
+        if (!"".equals(storedString)) {
+            return storedString;
+        } else {
+            throw new GetPreferenceException();
         }
-        return profil;
     }
 
     /**
-     * Création d'un nouveau profil
-     * @param pseudo
-     * @return
+     * Retire toutes les préférences liées à un utilisateur (pseudo / mot de passe / hash)
      */
-    public static ProfilListeToDo newProfil(String pseudo) {
-        return new ProfilListeToDo(pseudo);
-    }
-
-    /**
-     * Sauvegarde d'un profil dans un fichier texte au format json corespondant.
-     * @param profilListeToDo
-     */
-    public void sauveProfilToJsonFile(ProfilListeToDo profilListeToDo) {
-        Log.i(CAT, "Sauvegarde en cours");
-        final GsonBuilder builder = new GsonBuilder();
-        final Gson gson = builder.create();
-        String filename = profilListeToDo.getLogin() + "_json";
-        String fileContents = gson.toJson(profilListeToDo);
-        FileOutputStream outputStream;
-
-        try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-            outputStream.write(fileContents.getBytes());
-            outputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    protected void disconnect() {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.remove("pseudo");
+        editor.remove("hash");
+        editor.remove("encryptedPassword");
+        editor.apply();
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 }

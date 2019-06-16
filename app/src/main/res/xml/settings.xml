@@ -4,4 +4,15 @@
         android:title="@string/pseudo"
         android:key="pseudo"
         android:summary="@string/pseudoDescription"/>
+
+    <EditTextPreference
+        android:title="@string/hash"
+        android:key="hash"
+        android:summary="@string/hashDescription"/>
+
+    <EditTextPreference
+        android:title="@string/baseUrl"
+        android:key="baseUrl"
+        android:defaultValue="@string/defaultApiUrl"
+        android:summary="@string/baseUrlDescription"/>
 </PreferenceScreen>

@@ -16,5 +16,20 @@
     <string name="pseudoDescription">Login of the last user</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <string name="pass">Password</string>
+    <string name="promptforpass">Enter your password</string>
+    <string name="hash" translatable="false">hash</string>
+    <string name="hashDescription">Value of hash</string>
+    <string name="msgAuthentication">Error during Authentication</string>
+    <string name="ErrorServerResponse">Server Response issue</string>
+    <string name="wrongLogin">Pseudo or Password incorrect</string>
+    <string name="timeout" translatable="false">Timeout for contacting api</string>
+    <string name="noInternet">Check connection and restart the app</string>
+    <string name="baseUrlDescription">Url of the API</string>
+    <string name="baseUrl">Base url</string>
+    <string name="defaultApiUrl" translatable="false">http://tomnab.fr/todo-api/</string>
+    <string name="logOut">Log Out</string>
+    <string name="link">Link</string>
+    <string name="Url">url</string>
 </resources>
