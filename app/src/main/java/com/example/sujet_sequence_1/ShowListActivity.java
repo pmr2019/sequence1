@@ -1,23 +1,41 @@
 package com.example.sujet_sequence_1;
 
+import android.content.Context;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.net.NetworkRequest;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
 import com.example.sujet_sequence_1.api.APIClient;
 import com.example.sujet_sequence_1.api.APIInterface;
+import com.example.sujet_sequence_1.api.UpdateItemWorker;
+import com.example.sujet_sequence_1.bdd.AppDatabase;
+import com.example.sujet_sequence_1.bdd.BddItemToDo;
 import com.example.sujet_sequence_1.models.ItemToDo;
 import com.example.sujet_sequence_1.models.ListeToDo;
 import com.example.sujet_sequence_1.models.ProfilListeToDo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,6 +51,8 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
     private ListeToDo listeToDo;// ListeTodo chargée
     private Integer id; //indice de la liste
     private RecyclerViewAdapterItem adapter;// adapter pour adapter les données
+    private Button buttonNewToDo;
+    private ConnectivityManager connectivityManager;
 
     /**
      * appelée lors de la création de l'activité
@@ -51,6 +71,7 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
         if (b != null) {
             listeToDo = new ListeToDo(b.getString("titre"));
             id = b.getInt("id");
+            listeToDo.setId(id);
         } else {
             Log.i(CAT, "No bundle info. Terminating");
             finish();
@@ -76,10 +97,16 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
         recyclerView.setLayoutManager(layoutManager);
         adapter = new RecyclerViewAdapterItem(listeToDo.getLesItems(), this);
         recyclerView.setAdapter(adapter);
-        try {
-            appelAPIListeItem(recupPreference("hash"), recupPreference("baseUrl"));
-        } catch (GetPreferenceException e) {
-            e.printStackTrace();
+        checkConnectivity();
+        if (!isConnected) {
+            new AsyncTaskGetItemFromBdd().execute();
+
+        } else {
+            try {
+                appelAPIListeItem(recupPreference("hash"), recupPreference("baseUrl"));
+            } catch (GetPreferenceException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -89,6 +116,7 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
     private void intializeNewListInterface() {
         // boutton pour ajouter une url à la nouvelle liste
         imageButtonUrl = findViewById(R.id.imageButtonUrl);
+
         editTextUrl = findViewById(R.id.editTextUrl);
         imageButtonUrl.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +127,7 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
         });
 
         //bouton pour ajouter une nouvelle liste
-        Button buttonNewToDo = findViewById(R.id.buttonNewToDo);
+        buttonNewToDo = findViewById(R.id.buttonNewToDo);
         editTextNewItemToDo = findViewById(R.id.editTextNewItemToDo);
         buttonNewToDo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,14 +155,45 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
      * @param indice correspondant à l'item sur lequel on a cliqué
      */
     @Override
-    public void onItemClick(int indice) throws GetPreferenceException {
+    public void onItemClick(final int indice) {
         Log.d(CAT, String.valueOf(indice));
         final ItemToDo itemToDoClicked = listeToDo.getLesItems().get(indice);
         Log.i(CAT, "title clicked item : " + itemToDoClicked.getDescription());
+        boolean fait = itemToDoClicked.isFait();
+        int itemId = itemToDoClicked.getId();
+        if (isConnected) {
+            try {
+                appelAPIUpdateItem(itemId, (fait ? 0 : 1));
+            } catch (GetPreferenceException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Constraints constraints = new Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build();
+            Data itemData = new Data.Builder()
+                    .putInt("idList", id)
+                    .putInt("idItem", itemId)
+                    .putInt("check", fait ? 0 : 1)
+                    .build();
+            OneTimeWorkRequest updateItemRequest = new OneTimeWorkRequest.Builder(UpdateItemWorker.class)
+                    .setConstraints(constraints)
+                    .setInputData(itemData)
+                    .addTag("Todo-app")
+                    .build();
+            WorkManager.getInstance().enqueue(updateItemRequest);
+            itemToDoClicked.setFait(!fait);
+            new AsyncTaskUpdateItemBdd().execute(indice);
+        }
+        adapter.notifyDataSetChanged(); //to ensure that display match data
+    }
+
+    /**
+     *
+     */
+    private void appelAPIUpdateItem(Integer itemId, Integer check) throws GetPreferenceException {
         final String baseUrl = recupPreference("baseUrl");
         APIInterface api = APIClient.createService(APIInterface.class, baseUrl);
         final String hash = recupPreference("hash");
-        Call<ListeToDo> call = api.checkItemAPI(hash, id, itemToDoClicked.getId(), (itemToDoClicked.isFait()) ? 0 : 1);
+        Call<ListeToDo> call = api.checkItemAPI(hash, id, itemId, check);
         call.enqueue(new Callback<ListeToDo>() {
             @Override
             public void onResponse(Call<ListeToDo> call, Response<ListeToDo> response) {
@@ -152,7 +211,6 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
 
             }
         });
-        adapter.notifyDataSetChanged(); //to ensure that display match data
     }
 
     /**
@@ -219,6 +277,15 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
                     ShowListActivity.this.listeToDo.setLesItems(lesItems);
                     Log.i(CAT, lesItems.toString());
                     adapter.notifyDataSetChanged();
+                    AsyncTask.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            AppDatabase database = Room.databaseBuilder(getApplicationContext(),
+                                    AppDatabase.class, "ToDoApp-db").build();
+                            database.ItemToDoDao().insertAll(convertToBdd(ShowListActivity.this.listeToDo));
+                            Log.i(CAT, "Enregistrement dans la base de données de : " + convertToBdd(ShowListActivity.this.listeToDo).toString());
+                        }
+                    });
                 } else {
                     alerter("Error fetching ItemLists");
                 }
@@ -230,8 +297,189 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
                 Log.i(CAT, "ItemToDo fetching failure");
             }
         });
-        Log.i(CAT, "fin");
+        Log.i(CAT, "finAppelAPIListeItem");
 
 
     }
+
+    /**
+     * Convertit une liste de BddItemToDo en une liste de ItemToDo
+     *
+     * @param all liste de BddItemToDo
+     * @return list une liste d'ItemToDo
+     */
+
+
+    private ArrayList<ItemToDo> convertFromBdd(List<BddItemToDo> all) {
+        ArrayList<ItemToDo> list = new ArrayList<>();
+        for (BddItemToDo bddItemToDo : all) {
+            ItemToDo itemToDo = new ItemToDo(bddItemToDo.id);
+            itemToDo.setDescription(bddItemToDo.description);
+            itemToDo.setFait(bddItemToDo.fait);
+            itemToDo.setUrl(bddItemToDo.url);
+            list.add(itemToDo);
+        }
+        return list;
+    }
+
+    /**
+     * Convertit une listeToDo en une liste de BddItemToDo
+     *
+     * @param listeToDo
+     * @return list une liste d'ItemToDo
+     */
+
+    private ArrayList<BddItemToDo> convertToBdd(ListeToDo listeToDo) {
+        ArrayList<BddItemToDo> list = new ArrayList<>();
+        for (ItemToDo itemToDo : listeToDo.getLesItems()) {
+            BddItemToDo bddItemToDo = new BddItemToDo(itemToDo.getId());
+            bddItemToDo.description = itemToDo.getDescription();
+            bddItemToDo.fait = itemToDo.getFait();
+            bddItemToDo.url = itemToDo.getUrl();
+            bddItemToDo.idList = listeToDo.getId();
+            list.add(bddItemToDo);
+        }
+        return list;
+    }
+
+    private void checkConnectivity() {
+        // here we are getting the connectivity service from connectivity manager
+        connectivityManager = (ConnectivityManager) getSystemService(
+                Context.CONNECTIVITY_SERVICE);
+        // Getting network Info
+        // give Network Access Permission in Manifest
+        final NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        // isConnected is a boolean variabl
+        // here we check if network is connected or is getting connected
+        isConnected = activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+        // SHOW ANY ACTION YOU WANT TO SHOW
+        // WHEN WE ARE NOT CONNECTED TO INTERNET/NETWORK
+        Log.i(CAT, " NO NETWORK IN LIST ITEM!");
+        // if Network is not connected we will register a network callback to  monitor network
+        connectivityManager.registerNetworkCallback(
+                new NetworkRequest.Builder()
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build(), connectivityCallback);
+        monitoringConnectivity = true;
+
+
+    }
+
+
+    @Override
+    protected void onResume() {
+        Log.i(CAT, "onResume");
+        super.onResume();
+        checkConnectivity();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.i(CAT, "onPause");
+        // if network is being monitered then we will unregister the network callback
+        if (monitoringConnectivity) {
+            final ConnectivityManager connectivityManager
+                    = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            connectivityManager.unregisterNetworkCallback(connectivityCallback);
+            monitoringConnectivity = false;
+        }
+        super.onPause();
+    }
+
+    /**
+     * On désactive le callback du connectivity manager pour éviter les fuites mémoires
+     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        connectivityManager.unregisterNetworkCallback(connectivityCallback);
+    }
+
+    private ConnectivityManager.NetworkCallback connectivityCallback
+            = new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(Network network) {
+            isConnected = true;
+            Log.i(CAT, "INTERNET CONNECTED IN LIST ITEM");
+            try {
+                appelAPIListeItem(recupPreference("hash"), recupPreference("baseUrl"));
+            } catch (GetPreferenceException e) {
+                e.printStackTrace();
+            }
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    buttonNewToDo.setEnabled(true);
+                }
+            });
+
+        }
+
+        @Override
+        public void onLost(Network network) {
+            isConnected = false;
+            Log.i(CAT, "INTERNET LOST In LIST ITEM");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    buttonNewToDo.setEnabled(false);
+                }
+            });
+        }
+
+
+    };
+
+    /**
+     * Convertit un item en un item au format bdd
+     */
+    private BddItemToDo convertToBdd(ItemToDo itemToDo) {
+        BddItemToDo bddItemToDo = new BddItemToDo(itemToDo.getId());
+        bddItemToDo.fait = itemToDo.getFait();
+        bddItemToDo.description = itemToDo.getDescription();
+        bddItemToDo.url = itemToDo.getUrl();
+        bddItemToDo.idList = id;
+        return (bddItemToDo);
+    }
+
+
+    public class AsyncTaskGetItemFromBdd extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            AppDatabase database = Room.databaseBuilder(getApplicationContext(),
+                    AppDatabase.class, "ToDoApp-db").build();
+            listeToDo.setLesItems(convertFromBdd(database.ItemToDoDao().loadAllByIdList(listeToDo.getId())));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            adapter.setMesListesItem(listeToDo.getLesItems());
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    public class AsyncTaskUpdateItemBdd extends AsyncTask<Integer, Void, Void> {
+        @Override
+        protected Void doInBackground(Integer... integers) {
+            AppDatabase database = Room.databaseBuilder(getApplicationContext(),
+                    AppDatabase.class, "ToDoApp-db").build();
+            for (int indice : integers) {
+                database.ItemToDoDao().updateItem(convertToBdd(listeToDo.getLesItems().get(indice)));
+                listeToDo.setLesItems(convertFromBdd(database.ItemToDoDao().loadAllByIdList(listeToDo.getId())));
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            adapter.setMesListesItem(ShowListActivity.this.listeToDo.getLesItems());
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+
 }

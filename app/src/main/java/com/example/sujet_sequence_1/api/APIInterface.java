@@ -1,8 +1,8 @@
 package com.example.sujet_sequence_1.api;
 
 import com.example.sujet_sequence_1.models.AuthenticateResponse;
-import com.example.sujet_sequence_1.models.ProfilListeToDo;
 import com.example.sujet_sequence_1.models.ListeToDo;
+import com.example.sujet_sequence_1.models.ProfilListeToDo;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

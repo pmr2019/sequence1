@@ -32,4 +32,7 @@
     <string name="logOut">Log Out</string>
     <string name="link">Link</string>
     <string name="Url">url</string>
+    <string name="optionLocal">Off the network</string>
+    <string name="changeProfilNoInternet">Connect your phone to the Internet if you want to change profil</string>
+    <string name="please_connect">please connect yourself to log in</string>
 </resources>

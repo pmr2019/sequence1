@@ -1,8 +1,9 @@
 package com.example.sujet_sequence_1;
 
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.LiveData;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,7 +44,6 @@ class RecyclerViewAdapterList extends RecyclerView.Adapter<RecyclerViewAdapterLi
 
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder listViewHolder, int position) {
-        Log.i(CAT, "onBindViewHolder: called.");
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         listViewHolder.textViewListName.setText(mesListesToDo.get(position).getTitreListeToDo());

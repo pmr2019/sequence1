@@ -2,8 +2,6 @@ package com.example.sujet_sequence_1;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -55,12 +53,14 @@ public class MainActivity extends ParentActivity implements View.OnClickListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        try {
-            implicitAuthentication();
-        } catch (AuthenticationException e) {
-            e.printStackTrace();
-            Log.i(CAT, "Failure of implicit authentication");
+        if (verifReseau()) {
+            try {
+                implicitAuthentication();
+            } catch (AuthenticationException e) {
+                e.printStackTrace();
+            }
+        } else {
+            offlineAuthentication();
         }
         setContentView(R.layout.activity_main);
         button = findViewById(R.id.button);
@@ -118,17 +118,20 @@ public class MainActivity extends ParentActivity implements View.OnClickListener
             System.out.println("toto");
             return;
         }
-        String baseUrl;
-        try {
-            baseUrl = recupPreference("baseUrl");
-        } catch (GetPreferenceException e) {
-            //Si on ne trouve pas d'url dans les préférences on utilise la valeur par défaut de l'url de l'API
-            String defaultApiUrl = getResources().getString(R.string.defaultApiUrl);
-            updatePreference("baseUrl", defaultApiUrl);
-            baseUrl = defaultApiUrl;
+        if (!verifReseau()) {
+            alerter(getResources().getString(R.string.changeProfilNoInternet));
+        } else {
+            String baseUrl;
+            try {
+                baseUrl = recupPreference("baseUrl");
+            } catch (GetPreferenceException e) {
+                //Si on ne trouve pas d'url dans les préférences on utilise la valeur par défaut de l'url de l'API
+                String defaultApiUrl = getResources().getString(R.string.defaultApiUrl);
+                updatePreference("baseUrl", defaultApiUrl);
+                baseUrl = defaultApiUrl;
+            }
+            authentication(pseudo, pass, baseUrl);
         }
-        authentication(pseudo, pass, baseUrl);
-
     }
 
     /**
@@ -170,20 +173,6 @@ public class MainActivity extends ParentActivity implements View.OnClickListener
         editor.apply();
     }
 
-    /**
-     * Vérifie si l'application à accès à internet.
-     *
-     * @return booléen corespondant à la disponibilité de l'accès à internet.
-     */
-    private boolean verifReseau() {
-        ConnectivityManager cnMngr = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cnMngr.getActiveNetworkInfo();
-        if (netInfo != null) {
-            NetworkInfo.State netState = netInfo.getState();
-            return netState.compareTo(NetworkInfo.State.CONNECTED) == 0;
-        }
-        return false;
-    }
 
     /**
      * Connexion de l'utilisateur et enregistrement des paramètres de connexion
@@ -228,7 +217,8 @@ public class MainActivity extends ParentActivity implements View.OnClickListener
             final String pseudo = recupPreference("pseudo");
             final String encryptedPassword = recupPreference("encryptedPassword");
             final String password;
-            if ("".equals(encryptedPassword)) {
+            if ("".equals(encryptedPassword) || "".equals(pseudo)) {
+
                 throw new AuthenticationException();
             }
             try {
@@ -237,7 +227,6 @@ public class MainActivity extends ParentActivity implements View.OnClickListener
                 e.printStackTrace();
                 throw new AuthenticationException();
             }
-
             //Authentification auprès de l'API à l'aide des informations précédentes.
             APIInterface api = APIClient.createService(APIInterface.class, recupPreference("baseUrl"));
             Call<AuthenticateResponse> call = api.authenticate(pseudo, password);
@@ -266,5 +255,15 @@ public class MainActivity extends ParentActivity implements View.OnClickListener
         }
     }
 
+    private void offlineAuthentication() {
+        try {
+            if (!"".equals(recupPreference ("pseudo"))){
+                goToChoixListActivity();
+            }
+        } catch (GetPreferenceException e) {
+            alerter(getResources().getString(R.string.please_connect));
+            e.printStackTrace();
+        }
+    }
 }
 

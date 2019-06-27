@@ -2,14 +2,17 @@ package com.example.sujet_sequence_1;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.sujet_sequence_1.settings.SettingsActivity;
 
@@ -20,6 +23,12 @@ import com.example.sujet_sequence_1.settings.SettingsActivity;
 public class ParentActivity extends AppCompatActivity {
     public final String CAT = "PMR";
     ActionBar actionBar;
+    // to check if we are connected to Network
+    public boolean isConnected = true;
+
+    // to check if we are monitoring Network
+    public boolean monitoringConnectivity = false;
+
 
     /**
      * On récupère l'actionBar lors de la création de l'activité
@@ -32,6 +41,7 @@ public class ParentActivity extends AppCompatActivity {
         actionBar = getSupportActionBar();
         PreferenceManager.setDefaultValues(this, R.xml.settings, false);
     }
+
 
     /**
      * Méthode utilitaire générant un toast et un log
@@ -107,4 +117,21 @@ public class ParentActivity extends AppCompatActivity {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
+
+    /**
+     * Vérifie si l'application à accès à internet.
+     *
+     * @return booléen corespondant à la disponibilité de l'accès à internet.
+     */
+    public boolean verifReseau() {
+        ConnectivityManager cnMngr = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cnMngr.getActiveNetworkInfo();
+        if (netInfo != null) {
+            NetworkInfo.State netState = netInfo.getState();
+            return netState.compareTo(NetworkInfo.State.CONNECTED) == 0;
+        }
+        return false;
+    }
+
+
 }

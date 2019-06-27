@@ -1,6 +1,6 @@
 package com.example.sujet_sequence_1.models;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -18,6 +18,10 @@ public class ListeToDo implements Serializable {
     public ListeToDo(String titre) {
         this.lesItems = new ArrayList<>();
         this.titreListeToDo = titre;
+    }
+
+    public ListeToDo() {
+        this.lesItems = new ArrayList<>();
     }
 
     public int getId() {
@@ -39,6 +43,9 @@ public class ListeToDo implements Serializable {
         this.lesItems = listItem;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 
     @NonNull
     @Override

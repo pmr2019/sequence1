@@ -3,7 +3,7 @@ package com.example.sujet_sequence_1;
 
 import android.app.ActionBar;
 import android.os.Bundle;
-import android.support.v7.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceFragmentCompat;
 
 
 public class SettingsFragment extends PreferenceFragmentCompat {

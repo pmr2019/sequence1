@@ -2,9 +2,9 @@ package com.example.sujet_sequence_1;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +30,6 @@ class RecyclerViewAdapterItem extends RecyclerView.Adapter<RecyclerViewAdapterIt
     public RecyclerViewAdapterItem(ArrayList<ItemToDo> itemToDos, OnItemClickListener onItemClickListener) {
         this.itemToDos = itemToDos;
         this.onItemClickListener = onItemClickListener;
-
     }
 
     @NonNull
