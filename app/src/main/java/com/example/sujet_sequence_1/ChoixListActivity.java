@@ -141,16 +141,10 @@ public class ChoixListActivity extends ParentActivity implements RecyclerViewAda
         else {
             appelAPIGetListeToDos(hash, baseUrl);
         }
+        buttonNewList.setEnabled(isConnected);
     }
 
-    /**
-     * On désactive le callback du connectivity manager pour éviter les fuites mémoires
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        connectivityManager.unregisterNetworkCallback(connectivityCallback);
-    }
+
 
     /**
      * Implémentation de l'interface onItemClickListener
@@ -304,6 +298,9 @@ public class ChoixListActivity extends ParentActivity implements RecyclerViewAda
 
     }
 
+    /**
+     * On désactive le callback du connectivity manager pour éviter les fuites mémoires
+     */
     @Override
     protected void onPause() {
         // if network is being monitered then we will unregister the network callback

@@ -371,8 +371,12 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
         Log.i(CAT, "onResume");
         super.onResume();
         checkConnectivity();
+        buttonNewToDo.setEnabled(isConnected);
     }
 
+    /**
+     * On désactive le callback du connectivity manager pour éviter les fuites mémoires
+     */
     @Override
     protected void onPause() {
         Log.i(CAT, "onPause");
@@ -386,14 +390,6 @@ public class ShowListActivity extends ParentActivity implements RecyclerViewAdap
         super.onPause();
     }
 
-    /**
-     * On désactive le callback du connectivity manager pour éviter les fuites mémoires
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        connectivityManager.unregisterNetworkCallback(connectivityCallback);
-    }
 
     private ConnectivityManager.NetworkCallback connectivityCallback
             = new ConnectivityManager.NetworkCallback() {
